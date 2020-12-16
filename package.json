@@ -1,0 +1,29 @@
+{
+  "name": "findify-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arnaud420/Findify-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arnaud420/Findify-api/issues"
+  },
+  "homepage": "https://github.com/arnaud420/Findify-api#readme",
+  "dependencies": {
+    "axios": "^0.21.0",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "helmet": "^4.2.0",
+    "pg": "^8.5.1",
+    "sequelize": "^6.3.5"
+  }
+}
