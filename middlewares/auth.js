@@ -1,8 +1,8 @@
-import axios from 'axios';
-import Cookies from 'cookies';
-import config from '../config';
-import { setAuthorizationToken } from '../helpers/function';
-import { User } from '../models';
+const axios = require('axios');
+const Cookies = require('cookies');
+const config = require('../config');
+const { setAuthorizationToken } = require('../helpers/function');
+const { User } = require('../models');
 
 const { spotify } = config;
 
@@ -34,4 +34,4 @@ const withAuth = (handler) => async (req, res) => {
   }
 };
 
-export default withAuth;
+module.exports = withAuth;

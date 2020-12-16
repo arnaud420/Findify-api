@@ -1,4 +1,4 @@
-import axios from 'axios';
+const axios = require('axios');
 
 const generateRandomString = (length) => {
   let text = '';
@@ -40,7 +40,7 @@ const getAverageByArray = (array) => {
   return Number(nb / arrayLength);
 };
 
-export {
+module.exports = {
   generateRandomString,
   setAuthorizationToken,
   millisToMinutesAndSeconds,
