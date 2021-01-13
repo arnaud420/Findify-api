@@ -12,7 +12,7 @@ const getFavorites = async (UserId) => {
 
     if (tracks.length >= 1) {
       const ids = tracks.map((track) => track.spotifyId);
-      const { data } = await axios.get(`${spotify.apiUrl}/tracks/?ids=${ids.toString()}`);
+      const { data } = await axios.get(`${spotify.API_URL}/tracks/?ids=${ids.toString()}`);
       return data.tracks.filter((d) => d !== null);
     }
 

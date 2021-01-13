@@ -6,22 +6,25 @@ const { User } = require('../models');
 
 const { spotify } = config;
 
-const withAuth = (handler) => async (req, res) => {
+const withAuth = async (req, res, next) => {
   try {
     if (!req.headers.authorization) {
       throw new Error('No token found');
     }
-
     setAuthorizationToken(req.headers.authorization);
 
-    const { data } = await axios.get(`${spotify.apiUrl}/me`);
+    const { data } = await axios.get(`${spotify.API_URL}/me`);
 
     const user = await User.findOne({
       where: { spotifyId: data.id },
     });
 
-    req.currentUser = user;
-    return handler(req, res);
+    if (!user) {
+      throw new Error('No user found');
+    }
+
+    req.currentUser = data;
+    return next();
   } catch (error) {
     if (error.message === 'No token found') {
       return res.json({ success: false, error: 'Unauthorized' });

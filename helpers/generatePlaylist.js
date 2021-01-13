@@ -88,13 +88,13 @@ const getClosestMatch = (array, popularity, limit) => array
 const orderByPopularity = (array) => array.sort((a, b) => a.popularity - b.popularity).reverse();
 
 const getArtistsRelatedToArtist = (artistId) => new Promise((resolve, reject) => {
-  axios.get(`${spotify.apiUrl}/artists/${artistId}/related-artists`)
+  axios.get(`${spotify.API_URL}/artists/${artistId}/related-artists`)
     .then(({ data }) => resolve(data))
     .catch((error) => reject(error));
 });
 
 const getArtistTopTracks = (artistId, market) => new Promise((resolve, reject) => {
-  axios.get(`${spotify.apiUrl}/artists/${artistId}/top-tracks?market=${market}`)
+  axios.get(`${spotify.API_URL}/artists/${artistId}/top-tracks?market=${market}`)
     .then(({ data }) => resolve(data))
     .catch((error) => reject(error));
 });

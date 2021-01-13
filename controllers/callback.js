@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
 
     if (state === null || state !== storedState) {
       cookies.set(spotify.stateKey);
-      return res.redirect(`/?${queryString.stringify({
+      return res.redirect(`${FRONT_URI}?${queryString.stringify({
         error: 'state_mismatch',
       })}`);
     }
@@ -46,11 +46,10 @@ module.exports = async (req, res) => {
 
     setAuthorizationToken(`Bearer ${data.access_token}`);
 
-    const spotifyUser = await axios.get(`${spotify.apiUrl}/me`);
+    const spotifyUser = await axios.get(`${spotify.API_URL}/me`);
     const user = await User.findOne({
       where: { spotifyId: spotifyUser.data.id },
     });
-    let redirectionUrl = '/dashboard';
 
     if (user === null) {
       await User.create({
@@ -59,13 +58,12 @@ module.exports = async (req, res) => {
         avatar: spotifyUser.data.images.length >= 1 ? spotifyUser.data.images[0].url : null,
         spotifyId: spotifyUser.data.id,
       });
-      redirectionUrl = '/dashboard?isNew=1';
     }
 
-    res.redirect(FRONT_URI + redirectionUrl);
+    res.redirect(FRONT_URI + '?isAuth=1');
   } catch (error) {
     console.log('error', error);
-    res.redirect(`${FRONT_URI}/login?${queryString.stringify({
+    res.redirect(`${FRONT_URI}?${queryString.stringify({
       error: 'invalid_token',
     })}`);
   }
