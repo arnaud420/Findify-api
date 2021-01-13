@@ -1,10 +1,10 @@
 const Cookies = require('cookies');
 const queryString = require('query-string');
-const { setAuthorizationToken, generateRandomString } = '../helpers/function';
-const config = '../config';
+const { setAuthorizationToken, generateRandomString } = require('../helpers/function');
+const config = require('../config');
 
-const { spotify } = config;
-const { CLIENT_ID } = config;
+const { spotify, FRONT_URI } = config;
+const { CLIENT_ID } = spotify;
 
 module.exports = {
   login: (req, res) => {
@@ -20,7 +20,8 @@ module.exports = {
         state,
       })}`);
     } catch (error) {
-      res.redirect(`/?${queryString.stringify({
+      console.log('error', error);
+      res.redirect(`${FRONT_URI}/login?${queryString.stringify({
         error: 'state_mismatch',
       })}`);
     }

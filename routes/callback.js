@@ -4,12 +4,14 @@ const queryString = require('query-string');
 const config = require('../config');
 const { setAuthorizationToken } = require('../helpers/function');
 const { User } = require('../models');
+const { FRONT_URI } = require('../config');
 
 const { spotify } = config;
 const { CLIENT_ID, CLIENT_SECRET } = spotify;
 
 module.exports = async (req, res) => {
   try {
+    console.log('callback');
     const cookies = new Cookies(req, res);
     const { code, state } = req.query;
     const storedState = cookies.get(spotify.stateKey);
@@ -60,10 +62,10 @@ module.exports = async (req, res) => {
       redirectionUrl = '/dashboard?isNew=1';
     }
 
-    res.redirect(redirectionUrl);
+    res.redirect(FRONT_URI + redirectionUrl);
   } catch (error) {
-    console.log('EEE', error);
-    res.redirect(`/?${queryString.stringify({
+    console.log('error', error);
+    res.redirect(`${FRONT_URI}/login?${queryString.stringify({
       error: 'invalid_token',
     })}`);
   }
