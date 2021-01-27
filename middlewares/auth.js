@@ -23,6 +23,7 @@ const withAuth = async (req, res, next) => {
       throw new Error('No user found');
     }
 
+    data.UserId = user.id;
     req.currentUser = data;
     return next();
   } catch (error) {

@@ -1,6 +1,4 @@
 const config = {
-  maxFavoritesByUser: 4,
-
   FRONT_URI: 'http://localhost:3000',
 
   spotify: {

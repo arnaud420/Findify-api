@@ -1,7 +1,6 @@
-/* eslint-disable no-param-reassign */
-import axios from 'axios';
-import config from '../config';
-import { getAverageByArray } from './function';
+const axios = require('axios');
+const config = require('../config');
+const { getAverageByArray } = require('./function');
 
 const { spotify } = config;
 
@@ -159,4 +158,4 @@ const generatePlaylist = async (tracks) => {
   }
 };
 
-export default generatePlaylist;
+module.exports = generatePlaylist;
