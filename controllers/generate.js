@@ -1,11 +1,10 @@
 const generatePlaylist = require('../helpers/generatePlaylist');
-const { Playlist } = require('../models');
+const User = require('../models/User');
 
 module.exports = async (req, res) => {
   try {
     const { tracks } = req.body;
-    console.log('req.currentUser', req.currentUser);
-    const { UserId } = req.currentUser;
+    const { docId } = req.currentUser;
 
     if (tracks.length < 1) {
       throw new Error('User must have at least 1 track');
@@ -13,14 +12,18 @@ module.exports = async (req, res) => {
 
     const generatedPlaylist = await generatePlaylist(tracks);
 
-    const playlist = await Playlist.create({ UserId });
+    const user = await User.findOne({ '_id': docId }).exec();
+    user.playlists.push({
+      spotifyId: null,
+      tracks: generatedPlaylist,
+      generatedTracks: tracks,
+    });
+
+    await user.save();
 
     res.json({
       success: true,
-      data: {
-        generatedPlaylist,
-        playlist,
-      }
+      data: user.playlists[user.playlists.length - 1],
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message || error });

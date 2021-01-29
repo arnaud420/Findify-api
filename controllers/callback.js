@@ -3,7 +3,7 @@ const axios = require('axios');
 const queryString = require('query-string');
 const config = require('../config');
 const { setAuthorizationToken } = require('../helpers/function');
-const { User } = require('../models');
+const User = require('../models/User');
 const { FRONT_URI } = require('../config');
 
 const { spotify } = config;
@@ -47,20 +47,16 @@ module.exports = async (req, res) => {
     setAuthorizationToken(`Bearer ${data.access_token}`);
 
     const spotifyUser = await axios.get(`${spotify.API_URL}/me`);
-    const user = await User.findOne({
-      where: { spotifyId: spotifyUser.data.id },
-    });
+
+    const user = await User.findOne({ spotifyId: spotifyUser.data.id }).exec();
 
     if (user === null) {
-      await User.create({
-        name: spotifyUser.data.display_name,
-        email: spotifyUser.data.email,
-        avatar: spotifyUser.data.images.length >= 1 ? spotifyUser.data.images[0].url : null,
+      await new User({
         spotifyId: spotifyUser.data.id,
-      });
+      }).save();
     }
 
-    res.redirect(FRONT_URI + '?isAuth=1');
+    res.redirect(FRONT_URI + '/playlists/create');
   } catch (error) {
     console.log('error', error);
     res.redirect(`${FRONT_URI}?${queryString.stringify({

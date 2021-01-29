@@ -2,7 +2,7 @@ const axios = require('axios');
 const Cookies = require('cookies');
 const config = require('../config');
 const { setAuthorizationToken } = require('../helpers/function');
-const { User } = require('../models');
+const User = require('../models/User');
 
 const { spotify } = config;
 
@@ -15,15 +15,13 @@ const withAuth = async (req, res, next) => {
 
     const { data } = await axios.get(`${spotify.API_URL}/me`);
 
-    const user = await User.findOne({
-      where: { spotifyId: data.id },
-    });
+    const user = await User.findOne({ spotifyId: data.id }).exec();
 
     if (!user) {
       throw new Error('No user found');
     }
 
-    data.UserId = user.id;
+    data.docId = user.id;
     req.currentUser = data;
     return next();
   } catch (error) {

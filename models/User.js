@@ -1,11 +1,28 @@
-module.exports = (sequelize, DataTypes) => {
-  const User = sequelize.define('User', {
-    spotifyId: DataTypes.STRING,
-  }, {});
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-  User.associate = (models) => {
-    User.hasMany(models.Track);
-  };
+const playlistSchema = new Schema({
+  spotifyId: String,
+  cover: String,
+  tracks: [],
+  generatedTracks: [{
+    spotifyId: String,
+  }]
+}, {
+  timestamps: true,
+});
 
-  return User;
-};
+const userSchema = new Schema({
+  spotifyId: {
+    type: String,
+    unique: true,
+    required: [true, 'spotifyId is required'],
+  },
+  playlists: [playlistSchema],
+}, {
+  timestamps: true,
+});
+
+const User = mongoose.model('users', userSchema);
+
+module.exports = User;

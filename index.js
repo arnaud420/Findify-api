@@ -1,8 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
-require('dotenv').config()
+require('dotenv').config();
+const { DB_URL } = require('./config');
 
 const app = express();
 const PORT = process.env.PORT || 3003;
@@ -24,3 +26,14 @@ app.use('/', require('./routes'));
 app.listen(PORT, () => {
   console.log(`API is running on port ${PORT} ...`);
 });
+
+// ------------------------------------------------ DB Connection
+mongoose.connect(DB_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+  useCreateIndex: true
+});
+const db = mongoose.connection;
+db.once('open', () => console.log('Connected to mongodb database'));
+db.on('error', (error) => console.error(error));
