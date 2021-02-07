@@ -5,9 +5,7 @@ const playlistSchema = new Schema({
   spotifyId: String,
   cover: String,
   tracks: [],
-  generatedTracks: [{
-    spotifyId: String,
-  }]
+  generatedTracks: []
 }, {
   timestamps: true,
 });
