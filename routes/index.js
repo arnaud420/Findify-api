@@ -3,8 +3,6 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middlewares/auth');
 
-router.use('/test', authMiddleware)
-
 router.use('/auth', require('./auth'));
 router.use('/artists', require('./artists'));
 router.use('/callback', require('../controllers/callback'));

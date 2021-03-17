@@ -32,7 +32,7 @@ const withAuth = async (req, res, next) => {
     cookies.set('access_token');
     cookies.set('refresh_token');
     setAuthorizationToken();
-    return res.status(500).json({ success: false, error: error.message });
+    return res.status(401).json({ success: false, error: error.message });
   }
 };
 

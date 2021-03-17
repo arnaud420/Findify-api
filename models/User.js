@@ -3,10 +3,11 @@ const { Schema } = mongoose;
 
 const playlistSchema = new Schema({
   spotifyId: String,
-  cover: String,
   name: String,
   tracks: [],
-  generatedTracks: []
+  generatedTracks: [],
+  images: [],
+  uri: String,
 }, {
   timestamps: true,
 });
