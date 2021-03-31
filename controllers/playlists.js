@@ -31,6 +31,7 @@ module.exports = {
       const { playlist } = await getUserPlaylist(req.currentUser.docId, req.params.id);
       res.json({ success: true, data: playlist || null });
     } catch (error) {
+      console.log('error', error);
       res.status(error.status || 500).json({ success: false, error });
     }
   },

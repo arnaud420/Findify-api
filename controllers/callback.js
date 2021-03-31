@@ -44,7 +44,7 @@ module.exports = async (req, res) => {
     cookies.set('access_token', data.access_token, { httpOnly: false });
     cookies.set('refresh_token', data.refresh_token, { httpOnly: false });
 
-    setAuthorizationToken(`Bearer ${data.access_token}`);
+    setAuthorizationToken(`${data.token_type} ${data.access_token}`);
 
     const spotifyUser = await axios.get(`${spotify.API_URL}/me`);
 
