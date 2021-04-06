@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const generatePlaylist = require('../helpers/generatePlaylist');
 const { savePlaylistToSpotify } = require('../helpers/spotify');
 
 const getUserPlaylist = async (userId, playlistId) => {
@@ -88,6 +89,57 @@ module.exports = {
     } catch (error) {
       console.log('error', error);
       res.status(error.status || 500).json({ success: false, error });
+    }
+  },
+
+  generate: async (req, res) => {
+    try {
+      const { tracks } = req.body;
+      const { docId } = req.currentUser;
+
+      if (tracks.length < 1) {
+        throw new Error('User must have at least 1 track');
+      }
+
+      const generatedPlaylist = await generatePlaylist(tracks);
+
+      const user = await User.findOne({ '_id': docId }).exec();
+      user.playlists.push({
+        spotifyId: null,
+        tracks: generatedPlaylist,
+        generatedTracks: tracks,
+      });
+
+      await user.save();
+
+      res.json({
+        success: true,
+        data: user.playlists[user.playlists.length - 1],
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message || error });
+    }
+  },
+
+  regenerate: async (req, res) => {
+    try {
+      let { duration } = req.body;
+
+      if (!duration || parseInt(duration) <= 0) {
+        throw new Error('Duration must be at least 1');
+      }
+
+      const { user, playlist } = await getUserPlaylist(req.currentUser.docId, req.params.id);
+
+      const generatedPlaylist = await generatePlaylist(playlist.generatedTracks, duration);
+
+      res.json({
+        success: true,
+        data: generatedPlaylist,
+      });
+    } catch (error) {
+      console.log('error', error);
+      res.status(500).json({ success: false, error: error.message || error });
     }
   }
 

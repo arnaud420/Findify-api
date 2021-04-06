@@ -4,6 +4,25 @@ const { getAverageByArray } = require('./function');
 
 const { spotify } = config;
 
+const MAX_ARTISTS_LIMIT = 10;
+const DEFAULT_TRACKS_LIMIT = 30;
+
+const getApproximativTrackLimit = (tracks, hoursDuration) => {
+  const hourInMs = 3600000;
+  let maxTracksLimit = 0;
+  let currentPlaylistTime = 0;
+  const maxTime = hourInMs * hoursDuration;
+  for (let i = 0; i < tracks.length; i++) {
+    if (currentPlaylistTime >= maxTime) {
+      break;
+    }
+    currentPlaylistTime += tracks[i].duration_ms;
+    maxTracksLimit += 1;
+  }
+
+  return maxTracksLimit;
+}
+
 const removeDups = (array) => array.filter((v, i, a) => a.findIndex((t) => (t.id === v.id)) === i);
 
 const shuffleArray = (array) => {
@@ -102,13 +121,11 @@ const getSimilarArtists = async (artistIds, popularity) => {
   try {
     const artists = [];
     const concatenedArray = [];
-    // TODO: améliorer la gestion de la limite en fonction du nombre de favoris de l'utilisateur
-    const maxArtistsLimit = Math.round(20 / artistIds.length);
     const promises = artistIds.map((id) => getArtistsRelatedToArtist(id));
     const data = await Promise.all(promises);
     const similarArtists = data.map((artist) => artist.artists);
     for (let i = 0; i < similarArtists.length; i++) {
-      artists.push(getClosestMatch(orderByPopularity(similarArtists[i]), popularity, maxArtistsLimit));
+      artists.push(getClosestMatch(orderByPopularity(similarArtists[i]), popularity, MAX_ARTISTS_LIMIT));
     }
     return concatenedArray.concat(...artists);
   } catch (error) {
@@ -116,16 +133,14 @@ const getSimilarArtists = async (artistIds, popularity) => {
   }
 };
 
-const getSimilarTracks = async (artists, popularity, maxTracksLimit, market) => {
+const getSimilarTracks = async (artists, popularity, market, duration) => {
   try {
     const tracks = [];
     const promises = artists.map((artist) => getArtistTopTracks(artist.id, market));
     const data = await Promise.all(promises);
-    const similarTracks = data.map((track) => track.tracks);
-    const concatenedArray = alternateByArtist(orderByPopularity(removeDups(tracks.concat(...similarTracks))));
-    const randomClosestTracks = shuffleArray(getClosestMatch(concatenedArray, popularity, (maxTracksLimit * 2)))
-      .splice(0, maxTracksLimit);
-    return alternateByArtist(orderByPopularity(randomClosestTracks));
+    const similarTracks = removeDups(tracks.concat(...data.map((track) => track.tracks)));
+    const maxTracksLimit = !duration ? DEFAULT_TRACKS_LIMIT : getApproximativTrackLimit(similarTracks, duration);
+    return alternateByArtist(shuffleArray(getClosestMatch(similarTracks, popularity, maxTracksLimit)));
   } catch (error) {
     throw new Error(error);
   }
@@ -135,7 +150,7 @@ const getSimilarTracks = async (artists, popularity, maxTracksLimit, market) => 
 // Get artists from theses favorites tracks
 // Get related artists from each artists
 // Sort related artists by popularity
-// Get closest artists to the average popularity
+// Get 10 closest artists to the average popularity
 // Get top tracks from each related artist
 // Remove duplicate tracks
 // Sort tracks by popularity
@@ -145,15 +160,15 @@ const getSimilarTracks = async (artists, popularity, maxTracksLimit, market) => 
 // Sort by popularity
 // Alternate by artist
 
-const generatePlaylist = async (tracks) => {
+const generatePlaylist = async (tracks, duration = undefined) => {
   try {
-    const maxTracksLimit = 30;
     const obj = extractPopularityAndArtists(tracks);
     const averageTracksPopularities = getAverageByArray(obj.popularities);
     const similarArtists = await getSimilarArtists(obj.artistIds, averageTracksPopularities);
-    const similarTracks = await getSimilarTracks(similarArtists, averageTracksPopularities, maxTracksLimit, 'FR');
+    const similarTracks = await getSimilarTracks(similarArtists, averageTracksPopularities, 'FR', duration);
     return similarTracks;
   } catch (error) {
+    console.log('generatePlaylist error', error);
     throw new Error(error);
   }
 };
