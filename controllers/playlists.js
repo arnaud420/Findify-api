@@ -21,7 +21,7 @@ module.exports = {
   getAll: async (req, res) => {
     try {
       const user = await User.findOne({ _id: req.currentUser.docId }).exec();
-      res.json({ success: true, data: user.playlists || null });
+      res.json({ success: true, data: user.playlists.reverse() || null });
     } catch (error) {
       res.status(error.status || 500).json({ success: false, error });
     }

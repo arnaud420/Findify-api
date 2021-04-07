@@ -35,7 +35,10 @@ const requestAccessToken = async (req, res, next) => {
   try {
     setAuthorizationToken();
     const cookies = new Cookies(req, res);
+    const accessToken = cookies.get('access_token');
     const refreshToken = cookies.get('refresh_token');
+
+    console.log('accessToken', accessToken);
 
     if (!refreshToken) {
       throw new Error('No refresh token founded');
@@ -61,8 +64,8 @@ const requestAccessToken = async (req, res, next) => {
     req.currentUser = user;
     return next();
   } catch (error) {
-    console.log('error from requestAccessToken', error);
-    removeCookies(req, res);
+    console.log('error from requestAccessToken', error.message);
+    // removeCookies(req, res);
     return res.status(401).json({ success: false, error: error.message });
   }
 }
@@ -78,7 +81,7 @@ const withAuth = async (req, res, next) => {
     req.currentUser = user;
     return next();
   } catch (error) {
-    console.log('error auth', error);
+    console.log('error auth', error.message);
 
     // No token found
     if (error.message === 'No token found') {
@@ -92,7 +95,7 @@ const withAuth = async (req, res, next) => {
       return await requestAccessToken(req, res, next);
     }
 
-    removeCookies(req, res);
+    // removeCookies(req, res);
     return res.status(401).json({ success: false, error: error.message });
   }
 };
