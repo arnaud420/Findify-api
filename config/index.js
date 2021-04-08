@@ -11,15 +11,6 @@ const config = {
     API_URL: 'https://api.spotify.com/v1',
     redirectUri: process.env.SPOTIFY_REDIRECT_URI,
   },
-
-  postgres: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    host: 'localhost',
-    dialect: 'postgres',
-    port: 5432,
-  },
 };
 
 module.exports = config;
