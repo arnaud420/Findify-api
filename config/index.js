@@ -1,5 +1,5 @@
 const config = {
-  FRONT_URI: 'http://localhost:3000',
+  FRONT_URI: process.env.FRONT_URI,
   DB_URL: process.env.DB_URL,
 
   spotify: {

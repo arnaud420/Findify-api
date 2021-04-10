@@ -33,12 +33,12 @@ const removeCookies = (req, res) => {
 
 const requestAccessToken = async (req, res, next) => {
   try {
+
+    console.log('REQUEST ACCESS TOKEN');
+
     setAuthorizationToken();
     const cookies = new Cookies(req, res);
-    const accessToken = cookies.get('access_token');
     const refreshToken = cookies.get('refresh_token');
-
-    console.log('accessToken', accessToken);
 
     if (!refreshToken) {
       throw new Error('No refresh token founded');
@@ -48,6 +48,8 @@ const requestAccessToken = async (req, res, next) => {
     params.append('grant_type', 'refresh_token');
     params.append('refresh_token', refreshToken);
     params.append('client_id', spotify.CLIENT_ID);
+
+    console.log('refresh_token from cookies', refreshToken);
 
     const config = {
       headers: {
@@ -62,10 +64,11 @@ const requestAccessToken = async (req, res, next) => {
 
     const user = await getSpotifyUser();
     req.currentUser = user;
+
     return next();
   } catch (error) {
     console.log('error from requestAccessToken', error.message);
-    // removeCookies(req, res);
+    removeCookies(req, res);
     return res.status(401).json({ success: false, error: error.message });
   }
 }
@@ -85,7 +88,7 @@ const withAuth = async (req, res, next) => {
 
     // No token found
     if (error.message === 'No token found') {
-      return res.json({ success: false, error: 'Unauthorized' });
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 
     // The access token expired, get new token by providing refresh token

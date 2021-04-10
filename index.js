@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 require('dotenv').config();
-const { DB_URL } = require('./config');
+const { DB_URL, FRONT_URI } = require('./config');
 
 const app = express();
 const PORT = process.env.PORT || 3003;
@@ -17,7 +17,10 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(helmet());
 
 // ----------------------------- Allow cross-origin resource sharing
-app.use(cors());
+app.use(cors({
+  origin: FRONT_URI,
+  credentials: true,
+}));
 
 // ------------------------------------------------ Routes
 app.use('/', require('./routes'));
