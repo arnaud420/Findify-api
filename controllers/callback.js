@@ -41,8 +41,11 @@ module.exports = async (req, res) => {
     });
 
     // todo: passer les tokens en httpOnly: true pour ne pas les rendre accessible au front
-    cookies.set('access_token', data.access_token, { httpOnly: false });
-    cookies.set('refresh_token', data.refresh_token, { httpOnly: false });
+    const expires = new Date();
+    // expires in 2 week
+    expires.setDate(expires.getDate() + (2 * 7));
+    cookies.set('access_token', data.access_token, { httpOnly: false, expires });
+    cookies.set('refresh_token', data.refresh_token, { httpOnly: false, expires });
 
     setAuthorizationToken(`${data.token_type} ${data.access_token}`);
 
