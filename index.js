@@ -9,6 +9,8 @@ const { DB_URL, FRONT_URI } = require('./config');
 const app = express();
 const PORT = process.env.PORT || 3003;
 
+app.set('trust proxy', true)
+
 // ------------------------------------------------ Middlewares
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: false }));
 app.use(bodyParser.json({ limit: '10mb' }));
