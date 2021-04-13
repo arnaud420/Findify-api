@@ -44,8 +44,8 @@ module.exports = async (req, res) => {
     const expires = new Date();
     // expires in 2 week
     expires.setDate(expires.getDate() + (2 * 7));
-    cookies.set('access_token', data.access_token, { httpOnly: false, expires, secureProxy: true });
-    cookies.set('refresh_token', data.refresh_token, { httpOnly: false, expires, secureProxy: true });
+    cookies.set('access_token', data.access_token, { httpOnly: false, expires, secureProxy: true, secure: true, });
+    cookies.set('refresh_token', data.refresh_token, { httpOnly: false, expires, secureProxy: true, secure: true });
 
     console.log('data', data);
 
