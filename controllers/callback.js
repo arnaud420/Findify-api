@@ -47,11 +47,17 @@ module.exports = async (req, res) => {
     cookies.set('access_token', data.access_token, { httpOnly: false, expires });
     cookies.set('refresh_token', data.refresh_token, { httpOnly: false, expires });
 
+    console.log('data', data);
+
     setAuthorizationToken(`${data.token_type} ${data.access_token}`);
 
     const spotifyUser = await axios.get(`${spotify.API_URL}/me`);
 
+    console.log('spotifyUser', spotifyUser);
+
     const user = await User.findOne({ spotifyId: spotifyUser.data.id }).exec();
+
+    console.log('user', user);
 
     if (user === null) {
       await new User({
