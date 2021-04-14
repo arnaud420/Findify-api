@@ -141,6 +141,22 @@ module.exports = {
       console.log('error', error);
       res.status(500).json({ success: false, error: error.message || error });
     }
-  }
+  },
+
+  delete: async (req, res) => {
+    try {
+      const { user, playlist } = await getUserPlaylist(req.currentUser.docId, req.params.id);
+
+      user.playlists = [
+        ...user.playlists.filter((p) => p._id !== playlist._id),
+      ];
+
+      await user.save();
+      res.json({ success: true, data: true });
+    } catch (error) {
+      console.log('error', error);
+      res.status(error.status || 500).json({ success: false, error });
+    }
+  },
 
 }

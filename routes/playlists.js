@@ -9,5 +9,6 @@ router.post('/generate', playlistController.generate);
 router.post('/:id/spotify', playlistController.saveToSpotify);
 router.patch('/:id', playlistController.update);
 router.patch('/:id/regenerate', playlistController.regenerate);
+router.delete('/:id', playlistController.delete);
 
 module.exports = router;
