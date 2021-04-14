@@ -59,7 +59,12 @@ const requestAccessToken = async (req, res, next) => {
     }
     const { data } = await axios.post(`${spotify.url}/api/token`, params, config);
 
-    cookies.set('access_token', data.access_token, { httpOnly: false, secureProxy: true, secure: true, sameSite: 'none' });
+    if (process.env.NODE_ENV === 'production') {
+      cookies.set('access_token', data.access_token, { httpOnly: false, secure: true });
+    } else {
+      cookies.set('access_token', data.access_token, { httpOnly: false });
+    }
+
     setAuthorizationToken(`${data.token_type} ${data.access_token}`);
 
     const user = await getSpotifyUser();

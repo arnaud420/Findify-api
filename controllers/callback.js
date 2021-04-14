@@ -44,8 +44,14 @@ module.exports = async (req, res) => {
     const expires = new Date();
     // expires in 2 week
     expires.setDate(expires.getDate() + (2 * 7));
-    cookies.set('access_token', data.access_token, { httpOnly: false, expires, secureProxy: true, secure: true, sameSite: 'none' });
-    cookies.set('refresh_token', data.refresh_token, { httpOnly: false, expires, secureProxy: true, secure: true, sameSite: 'none' });
+
+    if (process.env.NODE_ENV === 'production') {
+      cookies.set('access_token', data.access_token, { httpOnly: false, expires, secure: true, });
+      cookies.set('refresh_token', data.refresh_token, { httpOnly: false, expires, secure: true, });
+    } else {
+      cookies.set('access_token', data.access_token, { httpOnly: false, expires });
+      cookies.set('refresh_token', data.refresh_token, { httpOnly: false, expires });
+    }
 
     console.log('data', data);
 
