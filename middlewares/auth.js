@@ -4,7 +4,7 @@ const config = require('../config');
 const { setAuthorizationToken } = require('../helpers/function');
 const User = require('../models/User');
 
-const { spotify } = config;
+const { spotify, FRONT_URI } = config;
 
 const getSpotifyUser = async () => {
   try {
@@ -38,7 +38,8 @@ const requestAccessToken = async (req, res, next) => {
 
     setAuthorizationToken();
     const cookies = new Cookies(req, res);
-    const refreshToken = cookies.get('refresh_token');
+    // const refreshToken = cookies.get('refresh_token');
+    const refreshToken = 'AQBGPbbytPbpxPM9J-oNPL2WfvzqLrrqPMvQ0RUzQJH2OWtnEYTtIxGxK-Klcmza4SoK_hQObs65Ri8lF1dd6wGdw3HL8FrHVL-i9Mths2zWcdTCq3W63FvDrZybROUcwjg';
 
     if (!refreshToken) {
       throw new Error('No refresh token founded');
@@ -59,11 +60,13 @@ const requestAccessToken = async (req, res, next) => {
     }
     const { data } = await axios.post(`${spotify.url}/api/token`, params, config);
 
-    if (process.env.NODE_ENV === 'production') {
-      cookies.set('access_token', data.access_token, { httpOnly: false, secure: true });
-    } else {
-      cookies.set('access_token', data.access_token, { httpOnly: false });
-    }
+    // if (process.env.NODE_ENV === 'production') {
+    //   cookies.set('access_token', data.access_token, { httpOnly: false, secure: true, domain: FRONT_URI });
+    // } else {
+    //   cookies.set('access_token', data.access_token, { httpOnly: false });
+    // }
+
+    return res.json({ success: true, data: { access_token: data.access_token } })
 
     setAuthorizationToken(`${data.token_type} ${data.access_token}`);
 

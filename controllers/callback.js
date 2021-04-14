@@ -4,9 +4,8 @@ const queryString = require('query-string');
 const config = require('../config');
 const { setAuthorizationToken } = require('../helpers/function');
 const User = require('../models/User');
-const { FRONT_URI } = require('../config');
 
-const { spotify } = config;
+const { spotify, FRONT_URI } = config;
 const { CLIENT_ID, CLIENT_SECRET } = spotify;
 
 module.exports = async (req, res) => {
@@ -45,21 +44,22 @@ module.exports = async (req, res) => {
     // expires in 2 week
     expires.setDate(expires.getDate() + (2 * 7));
 
-    if (process.env.NODE_ENV === 'production') {
-      cookies.set('access_token', data.access_token, { httpOnly: false, expires, secure: true, });
-      cookies.set('refresh_token', data.refresh_token, { httpOnly: false, expires, secure: true, });
-    } else {
-      cookies.set('access_token', data.access_token, { httpOnly: false, expires });
-      cookies.set('refresh_token', data.refresh_token, { httpOnly: false, expires });
-    }
+    // if (process.env.NODE_ENV === 'production') {
+    //   cookies.set('access_token', data.access_token, { httpOnly: false, expires, secure: true, domain: FRONT_URI });
+    //   cookies.set('refresh_token', data.refresh_token, { httpOnly: false, expires, secure: true, domain: FRONT_URI });
+    // } else {
+    //   cookies.set('access_token', data.access_token, { httpOnly: false, expires });
+    //   cookies.set('refresh_token', data.refresh_token, { httpOnly: false, expires });
+    // }
 
-    console.log('data', data);
+    console.log('data access_token', data.access_token);
+    console.log('data refresh_token', data.refresh_token);
 
     setAuthorizationToken(`${data.token_type} ${data.access_token}`);
 
     const spotifyUser = await axios.get(`${spotify.API_URL}/me`);
 
-    console.log('spotifyUser', spotifyUser);
+    console.log('spotifyUser', spotifyUser.data);
 
     const user = await User.findOne({ spotifyId: spotifyUser.data.id }).exec();
 
@@ -71,7 +71,7 @@ module.exports = async (req, res) => {
       }).save();
     }
 
-    res.redirect(FRONT_URI + '/playlists/create');
+    res.redirect(`${FRONT_URI}/?access_token=${data.access_token}&refresh_token=${data.refresh_token}`);
   } catch (error) {
     console.log('error', error);
     res.redirect(`${FRONT_URI}?${queryString.stringify({
