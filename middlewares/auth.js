@@ -1,10 +1,9 @@
 const axios = require('axios');
-const Cookies = require('cookies');
 const config = require('../config');
 const { setAuthorizationToken } = require('../helpers/function');
 const User = require('../models/User');
 
-const { spotify, FRONT_URI } = config;
+const { spotify } = config;
 
 const getSpotifyUser = async () => {
   try {
@@ -22,35 +21,13 @@ const getSpotifyUser = async () => {
   }
 }
 
-
-// Remove token from cookies
-const removeCookies = (req, res) => {
-  const cookies = new Cookies(req, res);
-  cookies.set('access_token');
-  cookies.set('refresh_token');
-  setAuthorizationToken();
-}
-
-const requestAccessToken = async (req, res, next) => {
+const requestAccessToken = async (refreshToken) => {
   try {
-
-    console.log('REQUEST ACCESS TOKEN');
-
     setAuthorizationToken();
-    const cookies = new Cookies(req, res);
-    // const refreshToken = cookies.get('refresh_token');
-    const refreshToken = 'AQBGPbbytPbpxPM9J-oNPL2WfvzqLrrqPMvQ0RUzQJH2OWtnEYTtIxGxK-Klcmza4SoK_hQObs65Ri8lF1dd6wGdw3HL8FrHVL-i9Mths2zWcdTCq3W63FvDrZybROUcwjg';
-
-    if (!refreshToken) {
-      throw new Error('No refresh token founded');
-    }
-
     const params = new URLSearchParams();
     params.append('grant_type', 'refresh_token');
     params.append('refresh_token', refreshToken);
     params.append('client_id', spotify.CLIENT_ID);
-
-    console.log('refresh_token from cookies', refreshToken);
 
     const config = {
       headers: {
@@ -59,25 +36,10 @@ const requestAccessToken = async (req, res, next) => {
       }
     }
     const { data } = await axios.post(`${spotify.url}/api/token`, params, config);
-
-    // if (process.env.NODE_ENV === 'production') {
-    //   cookies.set('access_token', data.access_token, { httpOnly: false, secure: true, domain: FRONT_URI });
-    // } else {
-    //   cookies.set('access_token', data.access_token, { httpOnly: false });
-    // }
-
-    return res.json({ success: true, data: { access_token: data.access_token } })
-
     setAuthorizationToken(`${data.token_type} ${data.access_token}`);
-
-    const user = await getSpotifyUser();
-    req.currentUser = user;
-
-    return next();
+    return data;
   } catch (error) {
-    console.log('error from requestAccessToken', error.message);
-    removeCookies(req, res);
-    return res.status(401).json({ success: false, error: error.message });
+    throw error;
   }
 }
 
@@ -86,27 +48,29 @@ const withAuth = async (req, res, next) => {
     if (!req.headers.authorization) {
       throw new Error('No token found');
     }
-    setAuthorizationToken(req.headers.authorization);
 
+    setAuthorizationToken(req.headers.authorization);
     const user = await getSpotifyUser();
     req.currentUser = user;
     return next();
   } catch (error) {
-    console.log('error auth', error.message);
-
-    // No token found
-    if (error.message === 'No token found') {
-      return res.status(401).json({ success: false, error: 'Unauthorized' });
-    }
-
     // The access token expired, get new token by providing refresh token
+    // Then update user token and send it to the front to save it in cookies
     if (error.response && error.response.data && error.response.data.error &&
       error.response.data.error.status === 401 &&
       error.response.data.error.message.toLowerCase() === 'the access token expired') {
-      return await requestAccessToken(req, res, next);
+      try {
+        const accessToken = req.headers.authorization.split('Bearer ')[1];
+        const user = await User.findOne({ accessToken }).exec();
+        const data = await requestAccessToken(user.refreshToken);
+        user.accessToken = data.access_token;
+        await user.save();
+        return res.json({ success: true, data });
+      } catch (error) {
+        return res.status(401).json({ success: false, error: error.message });
+      }
     }
 
-    // removeCookies(req, res);
     return res.status(401).json({ success: false, error: error.message });
   }
 };

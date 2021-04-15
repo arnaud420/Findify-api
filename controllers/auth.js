@@ -20,7 +20,6 @@ module.exports = {
         state,
       })}`);
     } catch (error) {
-      console.log('error', error);
       res.redirect(`${FRONT_URI}/login?${queryString.stringify({
         error: 'state_mismatch',
       })}`);

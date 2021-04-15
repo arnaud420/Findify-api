@@ -18,6 +18,14 @@ const userSchema = new Schema({
     unique: true,
     required: [true, 'spotifyId is required'],
   },
+  accessToken: {
+    type: String,
+    unique: true,
+  },
+  refreshToken: {
+    type: String,
+    unique: true,
+  },
   playlists: [playlistSchema],
 }, {
   timestamps: true,

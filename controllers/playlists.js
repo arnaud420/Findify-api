@@ -32,7 +32,6 @@ module.exports = {
       const { playlist } = await getUserPlaylist(req.currentUser.docId, req.params.id);
       res.json({ success: true, data: playlist || null });
     } catch (error) {
-      console.log('error', error);
       res.status(error.status || 500).json({ success: false, error });
     }
   },
@@ -43,7 +42,6 @@ module.exports = {
 
       Object.keys(req.body).map((key) => {
         //TODO: check le body
-        console.log('key', key);
         playlist[key] = req.body[key];
       });
 
@@ -55,7 +53,6 @@ module.exports = {
       await user.save();
       res.json({ success: true, data: playlist || null });
     } catch (error) {
-      console.log('error', error);
       res.status(error.status || 500).json({ success: false, error });
     }
   },
@@ -64,8 +61,6 @@ module.exports = {
     try {
       let { user, playlist } = await getUserPlaylist(req.currentUser.docId, req.params.id);
       const { data } = await savePlaylistToSpotify(user.spotifyId, playlist);
-
-      console.log('data', data);
 
       playlist = {
         tracks: playlist.tracks,
@@ -87,7 +82,6 @@ module.exports = {
       await user.save();
       res.json({ success: true, data: playlist || null });
     } catch (error) {
-      console.log('error', error);
       res.status(error.status || 500).json({ success: false, error });
     }
   },
@@ -138,7 +132,6 @@ module.exports = {
         data: generatedPlaylist,
       });
     } catch (error) {
-      console.log('error', error);
       res.status(500).json({ success: false, error: error.message || error });
     }
   },
@@ -154,7 +147,6 @@ module.exports = {
       await user.save();
       res.json({ success: true, data: true });
     } catch (error) {
-      console.log('error', error);
       res.status(error.status || 500).json({ success: false, error });
     }
   },

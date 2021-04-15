@@ -21,7 +21,6 @@ module.exports = {
         ...artistInfo,
       })
     } catch (error) {
-      console.log('error', error);
       res.json({ success: false, error });
     }
   },

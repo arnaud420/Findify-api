@@ -14,15 +14,13 @@ module.exports = async (req, res) => {
     const cookies = new Cookies(req, res);
     const { code, state } = req.query;
     const storedState = cookies.get(spotify.stateKey);
+    cookies.set(spotify.stateKey);
 
     if (state === null || state !== storedState) {
-      cookies.set(spotify.stateKey);
       return res.redirect(`${FRONT_URI}?${queryString.stringify({
         error: 'state_mismatch',
       })}`);
     }
-
-    cookies.set(spotify.stateKey);
 
     const { data } = await axios({
       method: 'post',
@@ -39,41 +37,26 @@ module.exports = async (req, res) => {
       json: true,
     });
 
-    // todo: passer les tokens en httpOnly: true pour ne pas les rendre accessible au front
-    const expires = new Date();
-    // expires in 2 week
-    expires.setDate(expires.getDate() + (2 * 7));
-
-    // if (process.env.NODE_ENV === 'production') {
-    //   cookies.set('access_token', data.access_token, { httpOnly: false, expires, secure: true, domain: FRONT_URI });
-    //   cookies.set('refresh_token', data.refresh_token, { httpOnly: false, expires, secure: true, domain: FRONT_URI });
-    // } else {
-    //   cookies.set('access_token', data.access_token, { httpOnly: false, expires });
-    //   cookies.set('refresh_token', data.refresh_token, { httpOnly: false, expires });
-    // }
-
-    console.log('data access_token', data.access_token);
-    console.log('data refresh_token', data.refresh_token);
-
     setAuthorizationToken(`${data.token_type} ${data.access_token}`);
 
     const spotifyUser = await axios.get(`${spotify.API_URL}/me`);
 
-    console.log('spotifyUser', spotifyUser.data);
-
     const user = await User.findOne({ spotifyId: spotifyUser.data.id }).exec();
-
-    console.log('user', user);
 
     if (user === null) {
       await new User({
         spotifyId: spotifyUser.data.id,
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
       }).save();
+    } else {
+      user.accessToken = data.access_token;
+      user.refreshToken = data.refresh_token;
+      await user.save();
     }
 
-    res.redirect(`${FRONT_URI}/?access_token=${data.access_token}&refresh_token=${data.refresh_token}`);
+    res.redirect(`${FRONT_URI}/?access_token=${data.access_token}`);
   } catch (error) {
-    console.log('error', error);
     res.redirect(`${FRONT_URI}?${queryString.stringify({
       error: 'invalid_token',
     })}`);

@@ -168,7 +168,6 @@ const generatePlaylist = async (tracks, duration = undefined) => {
     const similarTracks = await getSimilarTracks(similarArtists, averageTracksPopularities, 'FR', duration);
     return similarTracks;
   } catch (error) {
-    console.log('generatePlaylist error', error);
     throw new Error(error);
   }
 };
